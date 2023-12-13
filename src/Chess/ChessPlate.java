@@ -44,30 +44,40 @@ public class ChessPlate extends JPanel {
         return PlateIsBlocking;
     }
 
+    /**
+     * create a chess plate
+     * <p></p>
+     * <b>Note</b>: You may need to add <code>MouseListener</code> manually and use "{@link #calcChessPos(int, int)} " to get real chess pos when clicking, and manually judge logic by yourself. Because plate are only a component to show chess.
+     * @param row plate row
+     * @param col plate col
+     */
     public ChessPlate(int row, int col) {
         this.row = row;
         this.col = col;
         this.space = new ChessType[row][col];
         clear_chess();
         setSize((row * 2) * SPACE_MARGIN, (col * 2) * SPACE_MARGIN);
+    }
 
-//        add mouse listener
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int ex = e.getX(), ey = e.getY();
-//               valid pos
-                if (ex < HALF_SPACE_MARGIN || ey < HALF_SPACE_MARGIN || ex > (row + 1) * SPACE_MARGIN + HALF_SPACE_MARGIN || ey > (col + 1) * SPACE_MARGIN + HALF_SPACE_MARGIN) return;
+    /**
+     * calc real chess pos
+     * @param clickX mouse click x
+     * @param clickY mouse click y
+     * @return real chess pos, it will return null if click pos is not inside a chess
+     */
+    public int[] calcChessPos(int clickX, int clickY) {
+        //               valid pos
+        if (clickX < HALF_SPACE_MARGIN || clickY < HALF_SPACE_MARGIN || clickX > (row + 1) * SPACE_MARGIN + HALF_SPACE_MARGIN || clickY > (col + 1) * SPACE_MARGIN + HALF_SPACE_MARGIN) return null;
 
-                int x = (ex - HALF_SPACE_MARGIN) / SPACE_MARGIN, y = (ey - HALF_SPACE_MARGIN) / SPACE_MARGIN;
+        int x = (clickX - HALF_SPACE_MARGIN) / SPACE_MARGIN, y = (clickY - HALF_SPACE_MARGIN) / SPACE_MARGIN;
 
 //              click is inside a chess size chess
-                int minX = (x + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, minY = (y + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, maxX = (x + 1) * SPACE_MARGIN + HALF_CHESS_SIZE, maxY = (y + 1) * SPACE_MARGIN + HALF_CHESS_SIZE;
-                if (ex < minX || ey < minY || ex > maxX || ey > maxY) return;
+        int minX = (x + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, minY = (y + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, maxX = (x + 1) * SPACE_MARGIN + HALF_CHESS_SIZE, maxY = (y + 1) * SPACE_MARGIN + HALF_CHESS_SIZE;
+        if (clickX < minX || clickY < minY || clickX > maxX || clickY > maxY) return null;
 
-                Logger.debug("Mouse clicked at " + ex + ", " + ey + ", parsed pos: " + x + ", " + y);
-            }
-        });
+        Logger.debug("Chess Plate: Mouse clicked at " + clickX + ", " + clickY + ", parsed pos: " + x + ", " + y);
+
+        return new int[]{x, y};
     }
 
     /**
@@ -226,7 +236,14 @@ public class ChessPlate extends JPanel {
         space[x][y] = ChessType.EMPTY;
         render();
     }
-    
+
+    /**
+     * Place a chess by "SingleChess" object.
+     * <br>
+     * <b>Note</b>: This is a low level api. Unless you want to control the next Chess type manually, or we really recommend use {@link #chess_place(int, int)} instead. Because it will auto judge next chess color.
+     * @param c single chess
+     * @throws Exception "ChessAlreadyExistException" or "ExceedChessPlateException"
+     */
     public void chess_place(SingleChess c) throws Exception {
         if (PlateIsBlocking) return;
         chess_place(c.x, c.y, c.type);
@@ -242,6 +259,17 @@ public class ChessPlate extends JPanel {
             }
             Logger.info("Some one win: " + t);
         }
+    }
+
+    /**
+     * Place a chess by x and y. Type will auto judge.
+     * @param x chess real x pos
+     * @param y chess real y pos
+     * @throws Exception "ChessAlreadyExistException" or "ExceedChessPlateException"
+     */
+    public void chess_place(int x, int y) throws Exception {
+        chess_place(new SingleChess(x, y, TimeForWhite ? ChessType.WHITE : ChessType.BLACK));
+        TimeForWhite = !TimeForWhite;
     }
 
     public void regret() throws ChessPlateCannotRegretException {
@@ -326,8 +354,19 @@ public class ChessPlate extends JPanel {
         j.add(c);
 
         j.setVisible(true);
-        c.chess_place(new SingleChess(0, 0, ChessType.BLACK));
-//        c.chess_place(new SingleChess(0, 1, ChessType.WHITE));
-//        c.render();
+
+        c.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int[] pos = c.calcChessPos(e.getX(), e.getY());
+                if (pos == null) return;
+
+                try {
+                    c.chess_place(pos[0], pos[1]);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
     }
 }
