@@ -8,8 +8,7 @@ import src.Logger.Logger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.Arrays;
 import java.util.EventObject;
 import java.util.Objects;
@@ -17,7 +16,9 @@ import java.util.Stack;
 
 public class ChessPlate extends JPanel {
     public static final int SPACE_MARGIN = 42;
-    public static final int CHESS_SIZE = 30;
+    public static final int HALF_SPACE_MARGIN = SPACE_MARGIN / 2;
+    public static final int CHESS_SIZE = 28;
+    public static final int HALF_CHESS_SIZE = CHESS_SIZE / 2;
     private final int row;
     private final int col;
     /**
@@ -26,12 +27,22 @@ public class ChessPlate extends JPanel {
      * 2: white
      */
     private final ChessType[][] space;
-    private final boolean TimeForWhite = false;
+
+    private boolean PlateIsBlocking = false;
+    private boolean TimeForWhite = false;
     private final Stack<SingleChess> progress = new Stack<>();
 
     ActionListener winListener = null;
 
     JPanel panel1;
+
+    public void setPlateIsBlocking(boolean plateIsBlocking) {
+        PlateIsBlocking = plateIsBlocking;
+    }
+
+    public boolean getPlateIsBlocking() {
+        return PlateIsBlocking;
+    }
 
     public ChessPlate(int row, int col) {
         this.row = row;
@@ -39,6 +50,24 @@ public class ChessPlate extends JPanel {
         this.space = new ChessType[row][col];
         clear_chess();
         setSize((row * 2) * SPACE_MARGIN, (col * 2) * SPACE_MARGIN);
+
+//        add mouse listener
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int ex = e.getX(), ey = e.getY();
+//               valid pos
+                if (ex < HALF_SPACE_MARGIN || ey < HALF_SPACE_MARGIN || ex > (row + 1) * SPACE_MARGIN + HALF_SPACE_MARGIN || ey > (col + 1) * SPACE_MARGIN + HALF_SPACE_MARGIN) return;
+
+                int x = (ex - HALF_SPACE_MARGIN) / SPACE_MARGIN, y = (ey - HALF_SPACE_MARGIN) / SPACE_MARGIN;
+
+//              click is inside a chess size chess
+                int minX = (x + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, minY = (y + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, maxX = (x + 1) * SPACE_MARGIN + HALF_CHESS_SIZE, maxY = (y + 1) * SPACE_MARGIN + HALF_CHESS_SIZE;
+                if (ex < minX || ey < minY || ex > maxX || ey > maxY) return;
+
+                Logger.debug("Mouse clicked at " + ex + ", " + ey + ", parsed pos: " + x + ", " + y);
+            }
+        });
     }
 
     /**
@@ -199,6 +228,7 @@ public class ChessPlate extends JPanel {
     }
     
     public void chess_place(SingleChess c) throws Exception {
+        if (PlateIsBlocking) return;
         chess_place(c.x, c.y, c.type);
         progress.push(c);
         ChessType t = calcIsWin(c.x, c.y);
@@ -215,6 +245,7 @@ public class ChessPlate extends JPanel {
     }
 
     public void regret() throws ChessPlateCannotRegretException {
+        if (PlateIsBlocking) return;
         if (progress.size() == 1) {
             clear();
             return;
@@ -236,6 +267,7 @@ public class ChessPlate extends JPanel {
      * like init
      */
     public void clear() {
+        if (PlateIsBlocking) return;
         progress.clear();
         clear_chess();
         render();
@@ -294,7 +326,7 @@ public class ChessPlate extends JPanel {
         j.add(c);
 
         j.setVisible(true);
-//        c.chess_place(new SingleChess(0, 0, ChessType.BLACK));
+        c.chess_place(new SingleChess(0, 0, ChessType.BLACK));
 //        c.chess_place(new SingleChess(0, 1, ChessType.WHITE));
 //        c.render();
     }
