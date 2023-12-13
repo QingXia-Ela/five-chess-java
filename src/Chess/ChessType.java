@@ -1,5 +1,5 @@
 package src.Chess;
 
 public enum ChessType {
-    BLACK, WHITE
+    BLACK, WHITE, EMPTY
 }

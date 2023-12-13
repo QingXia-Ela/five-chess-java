@@ -5,7 +5,7 @@ public class SingleChess {
     public int x;
     public int y;
 
-    public SingleChess(ChessType type, int x, int y) {
+    public SingleChess(int x, int y, ChessType type) {
         this.type = type;
         this.x = x;
         this.y = y;

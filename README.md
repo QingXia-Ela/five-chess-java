@@ -8,14 +8,14 @@
 
 服务端发送消息类型：
 
-| MSG TYPE       | MSG BODY |
-|----------------|----------|
-| LOGIN_SUCCESS  |          |
-| LOGIN_ERROR    | 登录错误原因   |
-| OK             |          |
-| ERROR          | 错误消息     |
-| LOGOUT_SUCCESS |          |
-| LOGOUT_ERROR   | 登出错误原因   |
+| MSG TYPE       | MSG BODY      |
+|----------------|---------------|
+| LOGIN_SUCCESS  | <棋盘高度>:<棋盘宽度> |
+| LOGIN_ERROR    | 登录错误原因        |
+| OK             |               |
+| ERROR          | 错误消息          |
+| LOGOUT_SUCCESS |               |
+| LOGOUT_ERROR   | 登出错误原因        |
 
 ### Client
 
