@@ -26,7 +26,7 @@
 | LOGIN        | 用户名:密码   |
 | LOGOUT       | 用户名      |
 | CHAT         | 用户名:消息   |
-| CHESS_PLACE  | X:Y      |
+| CHESS_PLACE  | TYPE:X:Y |
 | CHESS_REGRET |          |
 
 
