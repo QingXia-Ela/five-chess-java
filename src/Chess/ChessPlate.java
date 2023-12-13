@@ -17,7 +17,7 @@ import java.util.Stack;
 public class ChessPlate extends JPanel {
     public static final int SPACE_MARGIN = 42;
     public static final int HALF_SPACE_MARGIN = SPACE_MARGIN / 2;
-    public static final int CHESS_SIZE = 28;
+    public static final int CHESS_SIZE = 30;
     public static final int HALF_CHESS_SIZE = CHESS_SIZE / 2;
     private final int row;
     private final int col;
@@ -56,7 +56,7 @@ public class ChessPlate extends JPanel {
         this.col = col;
         this.space = new ChessType[row][col];
         clear_chess();
-        setSize((row * 2) * SPACE_MARGIN, (col * 2) * SPACE_MARGIN);
+        setSize((row + 2) * SPACE_MARGIN, (col + 2) * SPACE_MARGIN);
     }
 
     /**
@@ -130,7 +130,7 @@ public class ChessPlate extends JPanel {
             }
         }
 
-       if (res[0] == -1 || res[1] == -1) {
+       if (res[0] == -1 || res[1] == -1 || res[0] >= row || res[1] >= col) {
            throw new NextPositionInvalidException();
        }
 
@@ -210,7 +210,7 @@ public class ChessPlate extends JPanel {
     }
 
     /**
-     * place chess by x, y and type
+     * place chess by x, y and type, will render chess plate.
      * <p>
      * <b>Warning</b>: this is a low level api, will not push info into stack and effect chess plate directly.
      */
@@ -254,10 +254,12 @@ public class ChessPlate extends JPanel {
 
 //        judge winner
         if (t != ChessType.EMPTY) {
+            Logger.info("Some one win: " + t);
+            setPlateIsBlocking(true);
             if (winListener != null) {
+//                this may cause render fail when it has thread block mission
                 winListener.actionPerformed(new ActionEvent(this, 0, t.toString()));
             }
-            Logger.info("Some one win: " + t);
         }
     }
 
@@ -291,13 +293,14 @@ public class ChessPlate extends JPanel {
 
     /**
      * clear the chess plate
-     *
-     * like init
+     * <p>
+     * like init, it will unblock plate
      */
     public void clear() {
         if (PlateIsBlocking) return;
         progress.clear();
         clear_chess();
+        setPlateIsBlocking(false);
         render();
     }
 
@@ -309,7 +312,6 @@ public class ChessPlate extends JPanel {
         g.setColor(Color.BLACK);
         for (int i = 1; i <= row; i++) {
             g.drawLine(SPACE_MARGIN, i * SPACE_MARGIN, col * SPACE_MARGIN, i * SPACE_MARGIN);
-
         }
         for (int j = 1; j <= col; j++) {
             g.drawLine(j * SPACE_MARGIN, SPACE_MARGIN, j * SPACE_MARGIN, row * SPACE_MARGIN);
@@ -334,6 +336,7 @@ public class ChessPlate extends JPanel {
 
     /**
      * listen someone win event
+     * <b>Warning</b>: If you have thread block mission, you should put the task into a new thread in order to prevent chess plate blocking.
      * @param listener action listener, you can use <code>ChessType.valueOf(command)</code> to get the enum.
      */
     public ChessPlate onSomeoneWin(ActionListener listener) {
@@ -345,19 +348,31 @@ public class ChessPlate extends JPanel {
      * Test only
      */
     public static void main(String[] args) throws Exception {
-        ChessPlate c = new ChessPlate(8, 7);
+        ChessPlate c = new ChessPlate(19, 19);
 
         JFrame  j = new JFrame();
 
-        j.setSize(10 * SPACE_MARGIN, 10 * SPACE_MARGIN);
+        j.setSize((19 + 2) * SPACE_MARGIN, (19 + 2) * SPACE_MARGIN);
 
         j.add(c);
 
         j.setVisible(true);
 
-        c.addMouseListener(new MouseAdapter() {
+        c.onSomeoneWin(e -> {
+            System.out.println(e.getActionCommand());
+
+            new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                c.clear();
+            }).start();
+        }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                Logger.debug("Get Click! " + e.getX() + " " + e.getY());
                 int[] pos = c.calcChessPos(e.getX(), e.getY());
                 if (pos == null) return;
 
