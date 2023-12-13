@@ -270,6 +270,7 @@ public class ChessPlate extends JPanel {
      * @throws Exception "ChessAlreadyExistException" or "ExceedChessPlateException"
      */
     public void chess_place(int x, int y) throws Exception {
+        if (PlateIsBlocking) return;
         chess_place(new SingleChess(x, y, TimeForWhite ? ChessType.WHITE : ChessType.BLACK));
         TimeForWhite = !TimeForWhite;
     }
@@ -297,11 +298,11 @@ public class ChessPlate extends JPanel {
      * like init, it will unblock plate
      */
     public void clear() {
-        if (PlateIsBlocking) return;
         progress.clear();
         clear_chess();
-        setPlateIsBlocking(false);
         render();
+        TimeForWhite = false;
+        setPlateIsBlocking(false);
     }
 
     @Override
@@ -331,11 +332,13 @@ public class ChessPlate extends JPanel {
      * render the chess plate
      */
     public void render() {
+        Logger.debug("Render chess plate");
         repaint();
     }
 
     /**
      * listen someone win event
+     * <p>
      * <b>Warning</b>: If you have thread block mission, you should put the task into a new thread in order to prevent chess plate blocking.
      * @param listener action listener, you can use <code>ChessType.valueOf(command)</code> to get the enum.
      */
@@ -360,6 +363,12 @@ public class ChessPlate extends JPanel {
 
         c.onSomeoneWin(e -> {
             System.out.println(e.getActionCommand());
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException ex) {
+//                ex.printStackTrace();
+//            }
+//            c.clear();
 
             new Thread(() -> {
                 try {
@@ -368,11 +377,13 @@ public class ChessPlate extends JPanel {
                     ex.printStackTrace();
                 }
                 c.clear();
+                System.out.println("clean!");
             }).start();
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Logger.debug("Get Click! " + e.getX() + " " + e.getY());
+
                 int[] pos = c.calcChessPos(e.getX(), e.getY());
                 if (pos == null) return;
 
