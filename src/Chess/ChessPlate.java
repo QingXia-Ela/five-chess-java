@@ -208,14 +208,18 @@ public class ChessPlate extends JPanel {
 //        judge winner
         if (t != ChessType.EMPTY) {
             if (winListener != null) {
-                winListener.actionPerformed(null);
+                winListener.actionPerformed(new ActionEvent(this, 0, t.toString()));
             }
             Logger.info("Some one win: " + t);
         }
     }
 
     public void regret() throws ChessPlateCannotRegretException {
-        if (progress.isEmpty() || progress.size() < 2) {
+        if (progress.size() == 1) {
+            clear();
+            return;
+        }
+        else if (progress.isEmpty()) {
             throw new ChessPlateCannotRegretException();
         }
 
@@ -228,6 +232,8 @@ public class ChessPlate extends JPanel {
 
     /**
      * clear the chess plate
+     *
+     * like init
      */
     public void clear() {
         progress.clear();
@@ -266,6 +272,10 @@ public class ChessPlate extends JPanel {
         repaint();
     }
 
+    /**
+     * listen someone win event
+     * @param listener action listener, you can use <code>ChessType.valueOf(command)</code> to get the enum.
+     */
     public ChessPlate onSomeoneWin(ActionListener listener) {
         winListener = listener;
         return this;
