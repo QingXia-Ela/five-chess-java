@@ -1,5 +1,7 @@
 package src.Chess;
 
+import src.Chess.Enums.ChessType;
+
 public class SingleChess {
     public ChessType type;
     public int x;

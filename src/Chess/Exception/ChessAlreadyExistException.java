@@ -1,5 +1,8 @@
 package src.Chess.Exception;
 
+/**
+ * 棋子已经存在
+ */
 public class ChessAlreadyExistException  extends Exception {
     @Override
     public String getMessage() {

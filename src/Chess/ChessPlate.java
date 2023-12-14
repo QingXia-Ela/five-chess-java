@@ -1,16 +1,13 @@
 package src.Chess;
 
-import src.Chess.Exception.ChessAlreadyExistException;
-import src.Chess.Exception.ChessPlateCannotRegretException;
-import src.Chess.Exception.ExceedChessPlateException;
-import src.Chess.Exception.NextPositionInvalidException;
+import src.Chess.Enums.ChessType;
+import src.Chess.Enums.PlateState;
+import src.Chess.Exception.*;
 import src.Logger.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Arrays;
-import java.util.EventObject;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -187,7 +184,8 @@ public class ChessPlate extends JPanel {
         return false;
     }
 
-    private ChessType calcIsWin(int row, int col) {
+    private PlateState calcIsWin(int row, int col) {
+        if (progress.size() == this.row * this.col) return PlateState.PLATE_FULL;
 
         boolean flag = false;
         for (int i = 0; i < 4; i++) {
@@ -195,10 +193,17 @@ public class ChessPlate extends JPanel {
         }
 
         if (flag) {
-            return space[row][col];
+            switch (space[row][col]) {
+                case BLACK -> {
+                    return PlateState.BLACK_WIN;
+                }
+                case WHITE -> {
+                    return PlateState.WHITE_WIN;
+                }
+            }
         }
 
-        return ChessType.EMPTY;
+        return PlateState.RUNNING;
     }
 
     private void clear_chess() {
@@ -214,7 +219,7 @@ public class ChessPlate extends JPanel {
      * <p>
      * <b>Warning</b>: this is a low level api, will not push info into stack and effect chess plate directly.
      */
-    private void chess_place(int x, int y, ChessType type) throws Exception {
+    private void chess_place(int x, int y, ChessType type) throws ExceedChessPlateException, ChessAlreadyExistException  {
         if (x < 0 || x >= this.row || y < 0 || y >= this.col) {
             throw new ExceedChessPlateException();
         }
@@ -244,16 +249,20 @@ public class ChessPlate extends JPanel {
      * @param c single chess
      * @throws Exception "ChessAlreadyExistException" or "ExceedChessPlateException"
      */
-    public void chess_place(SingleChess c) throws Exception {
+    public void chess_place(SingleChess c) throws PlateIsFullException, ExceedChessPlateException, ChessAlreadyExistException {
         if (PlateIsBlocking) return;
         chess_place(c.x, c.y, c.type);
         progress.push(c);
-        ChessType t = calcIsWin(c.x, c.y);
+        PlateState t = calcIsWin(c.x, c.y);
 
         Logger.debug("Chess place at x:" + c.x + " y:" + c.y + " type:" + c.type);
 
 //        judge winner
-        if (t != ChessType.EMPTY) {
+        if (t == PlateState.PLATE_FULL) {
+            setPlateIsBlocking(true);
+            throw new PlateIsFullException();
+        }
+        else if (t != PlateState.RUNNING) {
             Logger.info("Some one win: " + t);
             setPlateIsBlocking(true);
             if (winListener != null) {
@@ -267,9 +276,8 @@ public class ChessPlate extends JPanel {
      * Place a chess by x and y. Type will auto judge.
      * @param x chess real x pos
      * @param y chess real y pos
-     * @throws Exception "ChessAlreadyExistException" or "ExceedChessPlateException"
      */
-    public void chess_place(int x, int y) throws Exception {
+    public void chess_place(int x, int y) throws PlateIsFullException, ExceedChessPlateException, ChessAlreadyExistException {
         if (PlateIsBlocking) return;
         chess_place(new SingleChess(x, y, TimeForWhite ? ChessType.WHITE : ChessType.BLACK));
         TimeForWhite = !TimeForWhite;
@@ -339,6 +347,8 @@ public class ChessPlate extends JPanel {
     /**
      * listen someone win event
      * <p>
+     * <b>Note</b>: It will only add once, and it always uses the listener which is join at latest time.
+     * <p>
      * <b>Warning</b>: If you have thread block mission, you should put the task into a new thread in order to prevent chess plate blocking.
      * @param listener action listener, you can use <code>ChessType.valueOf(command)</code> to get the enum.
      */
@@ -351,7 +361,7 @@ public class ChessPlate extends JPanel {
      * Test only
      */
     public static void main(String[] args) throws Exception {
-        ChessPlate c = new ChessPlate(19, 19);
+        ChessPlate c = new ChessPlate(2, 2);
 
         JFrame  j = new JFrame();
 
@@ -362,14 +372,8 @@ public class ChessPlate extends JPanel {
         j.setVisible(true);
 
         c.onSomeoneWin(e -> {
-            System.out.println(e.getActionCommand());
-//            try {
-//                Thread.sleep(5000);
-//            } catch (InterruptedException ex) {
-//                ex.printStackTrace();
-//            }
-//            c.clear();
 
+            System.out.println(e.getActionCommand());
             new Thread(() -> {
                 try {
                     Thread.sleep(5000);
@@ -379,6 +383,7 @@ public class ChessPlate extends JPanel {
                 c.clear();
                 System.out.println("clean!");
             }).start();
+
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
