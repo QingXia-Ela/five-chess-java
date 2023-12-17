@@ -4,29 +4,34 @@
 
 以换行符结束
 
+### 共同消息
+
+| MSG TYPE        | MSG EXPLAIN | BODY EXAMPLE |
+|-----------------|-------------|--------------|
+| OK              | 通用OK        |              |
+| ERROR           | 通用错误消息      | Exception... |
+| REGRET_RESPONSE | 是否同意悔棋      | true/false   |
+| CHESS_REGRET    |             |              |
+| CHESS_PLACE     | TYPE:X:Y    | BLACK:0:0    |
+| CHAT            | 消息          | 114514       |
+| CHAT_RECEIVE    | 消息接收        | 1919810      |
+| HEARTBEAT       | 心跳包         |              |
+
 ### Server
 
 服务端发送消息类型：
 
-| MSG TYPE       | MSG BODY      |
-|----------------|---------------|
-| LOGIN_SUCCESS  | <棋盘高度>:<棋盘宽度> |
-| LOGIN_ERROR    | 登录错误原因        |
-| OK             |               |
-| ERROR          | 错误消息          |
-| LOGOUT_SUCCESS |               |
-| LOGOUT_ERROR   | 登出错误原因        |
+| MSG TYPE        | MSG EXPLAIN | BODY EXAMPLE |
+|-----------------|-------------|--------------|
+| LOGIN_SUCCESS   | 棋盘宽高        | 114:514      |
+| LOGIN_ERROR     | 登录错误原因      | 1337         |
+
 
 ### Client
 
 客户端发送消息类型：
 
-| MSG TYPE     | MSG BODY |
-|--------------|----------|
-| LOGIN        | 用户名:密码   |
-| LOGOUT       | 用户名      |
-| CHAT         | 用户名:消息   |
-| CHESS_PLACE  | TYPE:X:Y |
-| CHESS_REGRET |          |
-
-
+| MSG TYPE        | MSG EXPLAIN | BODY EXAMPLE |
+|-----------------|-------------|--------------|
+| LOGIN           | 用户名:密码      | foo:bar      |
+| LOGOUT          | 用户名         | foo          |

@@ -1,12 +1,12 @@
 package src.MessageHandler.Message;
 
-import src.MessageHandler.Message.Enums.ClientMessageType;
 import src.MessageHandler.Exception.MessageParseException;
 import src.MessageHandler.Exception.MessageTypeNonExistExpection;
+import src.MessageHandler.Message.Enums.MessageType;
 
-public class ClientMessage extends Message<ClientMessageType> {
+public class ClientMessage extends Message<MessageType> {
     public String message;
-    public ClientMessageType type;
+    public MessageType type;
 
     public ClientMessage parse_message(String message) throws MessageParseException, MessageTypeNonExistExpection {
         String[] message_parts = message.split(":");
@@ -18,15 +18,15 @@ public class ClientMessage extends Message<ClientMessageType> {
         return new ClientMessage(message_parts[1], parse_string_2_type(message_parts[0]));
     }
 
-    public ClientMessageType parse_string_2_type(String type) throws MessageTypeNonExistExpection {
-        String res = String.valueOf(ClientMessageType.valueOf(type));
+    public MessageType parse_string_2_type(String type) throws MessageTypeNonExistExpection {
+        String res = String.valueOf(MessageType.valueOf(type));
         if (res == null) {
             throw new MessageTypeNonExistExpection();
         }
-        return ClientMessageType.valueOf(res);
+        return MessageType.valueOf(res);
     }
 
-    private static String get_message_type_from_string(ClientMessageType type) throws MessageTypeNonExistExpection {
+    private static String get_message_type_from_string(MessageType type) throws MessageTypeNonExistExpection {
         return switch (type) {
             case LOGIN -> "LOGIN";
             case LOGOUT -> "LOGOUT";
@@ -37,15 +37,11 @@ public class ClientMessage extends Message<ClientMessageType> {
         };
     }
 
-    public static String parse_type_2_string_directly(ClientMessageType type) throws MessageTypeNonExistExpection {
+    public String parse_type_2_string(MessageType type) throws MessageTypeNonExistExpection {
         return get_message_type_from_string(type);
     }
 
-    public String parse_type_2_string(ClientMessageType type) throws MessageTypeNonExistExpection {
-        return get_message_type_from_string(type);
-    }
-
-    public ClientMessage(String message, ClientMessageType type) {
+    public ClientMessage(String message, MessageType type) {
         super(message, type);
     }
 }
