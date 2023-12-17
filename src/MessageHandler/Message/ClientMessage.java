@@ -9,7 +9,7 @@ public class ClientMessage extends Message<MessageType> {
     public MessageType type;
 
     public ClientMessage parse_message(String message) throws MessageParseException, MessageTypeNonExistExpection {
-        String[] message_parts = message.split(":");
+        String[] message_parts = message.split("\\$");
 
         if (message_parts.length != 2) {
             throw new MessageParseException();
@@ -43,5 +43,9 @@ public class ClientMessage extends Message<MessageType> {
 
     public ClientMessage(String message, MessageType type) {
         super(message, type);
+    }
+
+    public ClientMessage() {
+        super("", MessageType.OK);
     }
 }

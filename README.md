@@ -4,13 +4,17 @@
 
 以换行符结束
 
+示例： `LOGIN_SUCCESS$114:514\n`
+
+`$` 左侧为消息类型，右侧为消息体
+
 ### 共同消息
 
 | MSG TYPE        | MSG EXPLAIN | BODY EXAMPLE |
 |-----------------|-------------|--------------|
 | OK              | 通用OK        |              |
 | ERROR           | 通用错误消息      | Exception... |
-| REGRET_RESPONSE | 是否同意悔棋      | true/false   |
+| REGRET_RESPONSE | 是否同意悔棋      | True/False   |
 | CHESS_REGRET    |             |              |
 | CHESS_PLACE     | TYPE:X:Y    | BLACK:0:0    |
 | CHAT            | 消息          | 114514       |

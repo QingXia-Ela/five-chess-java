@@ -8,8 +8,8 @@ public class SingleChess {
     public int y;
 
     public SingleChess(int x, int y, ChessType type) {
-        this.type = type;
         this.x = x;
         this.y = y;
+        this.type = type;
     }
 }

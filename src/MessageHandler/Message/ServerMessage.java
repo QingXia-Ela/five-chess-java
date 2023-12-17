@@ -9,7 +9,7 @@ public class ServerMessage extends Message<MessageType> {
     public MessageType type;
 
     public ServerMessage parse_message(String message) throws MessageParseException, MessageTypeNonExistExpection {
-        String[] message_parts = message.split(":");
+        String[] message_parts = message.split("\\$");
 
         if (message_parts.length != 2) {
             throw new MessageParseException();
