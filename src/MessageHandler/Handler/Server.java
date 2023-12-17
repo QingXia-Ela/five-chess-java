@@ -11,6 +11,8 @@ import src.MessageHandler.Message.ServerMessage;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataInputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -21,13 +23,13 @@ public class Server extends Handler {
     public static ServerMessage serverMessageUtilsObj = new ServerMessage();
     public static ClientMessage clientMessageUtilsObj = new ClientMessage();
     public static final String HandlerType = "Server";
-    public ServerSocket serverSocket;
+    public DatagramSocket serverSocket;
     private EnumMap<MessageType, ArrayList<ActionListener>> actionMap;
     private Thread listenThread;
 
     public Server(int port) throws Exception {
         Logger.debug("Create Server Message Handler at port " + port);
-        this.serverSocket = new ServerSocket(port);
+        this.serverSocket = new DatagramSocket(port);
     }
 
     /**
@@ -51,8 +53,11 @@ public class Server extends Handler {
         listenThread = new Thread(() -> {
             while (true) {
                 try {
-                    Socket s = serverSocket.accept();
-                    String in = new DataInputStream(s.getInputStream()).readUTF();
+                    DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
+                    serverSocket.receive(packet);
+                    byte[] data = packet.getData();
+                    int len = packet.getLength();
+                    String in = new String(data, 0, len);
                     ClientMessage msg = clientMessageUtilsObj.parse_message(in);
                     actionMap.get(msg.type).forEach(action -> action.actionPerformed(new ActionEvent(msg, 0, msg.message)));
                     Logger.debug("Server received: " + in);

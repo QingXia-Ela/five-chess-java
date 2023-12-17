@@ -9,6 +9,7 @@ import src.MessageHandler.Message.Exception.MessageResolveException;
 import java.util.Objects;
 
 public class MessageResolver {
+//    deserialize message
     @AcceptType(MessageType.OK)
     public static String resolveOKMessage(String body) {
         return body.trim();
@@ -80,5 +81,53 @@ public class MessageResolver {
     @AcceptType(MessageType.LOGOUT)
     public static String resolveLogoutMessage(String body) {
         return body.trim();
+    }
+//    serialize message
+    public static String serializeOKMessage(String message) {
+        return MessageType.OK + "$" + message;
+    }
+
+    public static String serializeErrorMessage(String message) {
+        return MessageType.ERROR + "$" + message;
+    }
+
+    public static String serializeRegretResponseMessage(boolean isRegret) {
+        return MessageType.REGRET_RESPONSE + "$" + isRegret;
+    }
+
+    public static String serializeChessRegretMessage() {
+        return MessageType.CHESS_REGRET + "$ ";
+    }
+
+    public static String serializeChessPlaceMessage(SingleChess chess) {
+        return MessageType.CHESS_PLACE + "$" + chess.type + ":" + chess.x + ":" + chess.y;
+    }
+
+    public static String serializeChatMessage(String message) {
+        return MessageType.CHAT + "$" + message;
+    }
+
+    public static String serializeChatReceiveMessage(String message) {
+        return MessageType.CHAT_RECEIVE + "$" + message;
+    }
+
+    public static String serializeHeartbeatMessage() {
+        return MessageType.HEARTBEAT + "$";
+    }
+
+    public static String serializeLoginSuccessMessage(int x, int y) {
+        return MessageType.LOGIN_SUCCESS + "$" + x + ":" + y;
+    }
+
+    public static String serializeLoginErrorMessage(String message) {
+        return MessageType.LOGIN_ERROR + "$" + message;
+    }
+
+    public static String serializeLoginMessage(String username, String password) {
+        return MessageType.LOGIN + "$" + username + ":" + password;
+    }
+
+    public static String serializeLogoutMessage(String username) {
+        return MessageType.LOGOUT + "$" + username;
     }
 }
