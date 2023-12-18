@@ -1,8 +1,6 @@
 package src.MessageHandler.Handler;
 
 import src.Logger.Logger;
-import src.MessageHandler.Exception.MessageParseException;
-import src.MessageHandler.Exception.MessageTypeNonExistExpection;
 import src.MessageHandler.Message.ClientMessage;
 import src.MessageHandler.Message.Enums.MessageType;
 import src.MessageHandler.Message.MessageResolver;
@@ -10,11 +8,8 @@ import src.MessageHandler.Message.ServerMessage;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
@@ -24,17 +19,28 @@ public class Server extends Handler {
     public static ClientMessage clientMessageUtilsObj = new ClientMessage();
     public static final String HandlerType = "Server";
     public DatagramSocket serverSocket;
-    private EnumMap<MessageType, ArrayList<ActionListener>> actionMap;
+    private final EnumMap<MessageType, ArrayList<ActionListener>> actionMap;
     private Thread listenThread;
+    private int clientPort;
 
+    /**
+     * Create a server handler.
+     * <br>
+     * You need to call {@link #listen()} to start listening.
+     * */
     public Server(int port) throws Exception {
-        Logger.debug("Create Server Message Handler at port " + port);
+        this.actionMap = new EnumMap<>(MessageType.class);
+        for (MessageType type : MessageType.values()) {
+            actionMap.put(type, new ArrayList<>());
+        }
+        Logger.info("Create Server Message Handler at port " + port);
         this.serverSocket = new DatagramSocket(port);
     }
 
     /**
      * Add message listener, event listener will receive an event that command is message body.
      * <br>
+     * <b>Note</b>: You can use {@link MessageResolver} resolve methods to resolve message into standard message data struct.
      * @param type Message type
      * @param actionListener Event listener
      * @return This
@@ -57,6 +63,10 @@ public class Server extends Handler {
                     serverSocket.receive(packet);
                     byte[] data = packet.getData();
                     int len = packet.getLength();
+//                    init client port
+                    if (clientPort == 0) {
+                        clientPort = packet.getPort();
+                    }
                     String in = new String(data, 0, len);
                     ClientMessage msg = clientMessageUtilsObj.parse_message(in);
                     actionMap.get(msg.type).forEach(action -> action.actionPerformed(new ActionEvent(msg, 0, msg.message)));
@@ -66,6 +76,22 @@ public class Server extends Handler {
                 }
             }
         });
+    }
+
+    /**
+     * Send the message to client directly.
+     * <br>
+     *  <b>Note</b>: You need to use {@link MessageResolver} serialize methods to get the String message.
+     * @param message Message to send.
+     */
+    public void sendMessage(String message) {
+        if (clientPort == 0) {
+            Logger.warning("Client port is not set, can not send message, operation denied.");
+            return;
+        }
+        byte[] buf = message.getBytes();
+        int len = buf.length;
+        DatagramPacket packet = new DatagramPacket(buf, len, serverSocket.getLocalAddress(), clientPort);
     }
 
     public void unListen() {
