@@ -1,17 +1,16 @@
 package src.MessageHandler.Message;
 
+import src.Logger.Logger;
 import src.MessageHandler.Exception.MessageParseException;
 import src.MessageHandler.Exception.MessageTypeNonExistExpection;
 import src.MessageHandler.Message.Enums.MessageType;
 
 public class ServerMessage extends Message<MessageType> {
-    public String message;
-    public MessageType type;
-
     public ServerMessage parse_message(String message) throws MessageParseException, MessageTypeNonExistExpection {
         String[] message_parts = message.split("\\$");
 
         if (message_parts.length != 2) {
+            Logger.error("该信息不符合协议: " + message);
             throw new MessageParseException();
         }
 

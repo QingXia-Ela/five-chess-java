@@ -1,17 +1,17 @@
 package src.MessageHandler.Message;
 
+import src.Logger.Logger;
 import src.MessageHandler.Exception.MessageParseException;
 import src.MessageHandler.Exception.MessageTypeNonExistExpection;
 import src.MessageHandler.Message.Enums.MessageType;
 
 public class ClientMessage extends Message<MessageType> {
-    public String message;
-    public MessageType type;
 
     public ClientMessage parse_message(String message) throws MessageParseException, MessageTypeNonExistExpection {
         String[] message_parts = message.split("\\$");
 
         if (message_parts.length != 2) {
+            Logger.error("该信息不符合协议: " + message);
             throw new MessageParseException();
         }
 
@@ -19,11 +19,11 @@ public class ClientMessage extends Message<MessageType> {
     }
 
     public MessageType parse_string_2_type(String type) throws MessageTypeNonExistExpection {
-        String res = String.valueOf(MessageType.valueOf(type));
+        String res = MessageType.valueOf(type).toString();
         if (res == null) {
             throw new MessageTypeNonExistExpection();
         }
-        return MessageType.valueOf(res);
+        return MessageType.valueOf(type);
     }
 
     private static String get_message_type_from_string(MessageType type) throws MessageTypeNonExistExpection {

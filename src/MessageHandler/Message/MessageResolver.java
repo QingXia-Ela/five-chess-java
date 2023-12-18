@@ -112,7 +112,7 @@ public class MessageResolver {
     }
 
     public static String serializeHeartbeatMessage() {
-        return MessageType.HEARTBEAT + "$";
+        return MessageType.HEARTBEAT + "$ ";
     }
 
     public static String serializeLoginSuccessMessage(int x, int y) {

@@ -15,11 +15,7 @@ public abstract class Message<T extends Enum> {
 
     @Override
     public String toString() {
-        try {
-            return parse_type_2_string(type) + ":" + message + "\n";
-        } catch (MessageTypeNonExistExpection e) {
-            return "ERROR:" + e.getMessage() + "\n";
-        }
+        return type + "$" + message;
     }
 
     public Message(String message, T type) {
