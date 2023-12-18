@@ -121,6 +121,12 @@ public class Server extends Handler {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+        }).addEventListener(MessageType.LOGIN, e -> {
+            try {
+                s.sendMessage(MessageResolver.serializeLoginSuccessMessage(114,514));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         });
     }
 }

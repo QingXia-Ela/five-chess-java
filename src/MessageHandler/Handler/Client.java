@@ -3,6 +3,7 @@ package src.MessageHandler.Handler;
 import src.Logger.Logger;
 import src.MessageHandler.Message.ClientMessage;
 import src.MessageHandler.Message.Enums.MessageType;
+import src.MessageHandler.Message.Exception.MessageResolveException;
 import src.MessageHandler.Message.MessageResolver;
 import src.MessageHandler.Message.ServerMessage;
 
@@ -14,6 +15,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 
 public class Client extends Handler{
@@ -100,8 +102,18 @@ public class Client extends Handler{
 
         c.addEventListener(MessageType.HEARTBEAT, e -> {
             Logger.info("Heartbeat received");
+        }).addEventListener(MessageType.LOGIN_SUCCESS, e -> {
+            try {
+                Logger.info("plate info: " + Arrays.toString(MessageResolver.resolveLoginSuccessMessage(e.getActionCommand())));
+            } catch (MessageResolveException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         c.sendMessage(MessageResolver.serializeHeartbeatMessage());
+
+        Thread.sleep(2000);
+
+        c.sendMessage(MessageResolver.serializeLoginMessage("test", "test"));
     }
 }

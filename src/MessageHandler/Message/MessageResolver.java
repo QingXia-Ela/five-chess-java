@@ -115,8 +115,8 @@ public class MessageResolver {
         return MessageType.HEARTBEAT + "$ ";
     }
 
-    public static String serializeLoginSuccessMessage(int x, int y) {
-        return MessageType.LOGIN_SUCCESS + "$" + x + ":" + y;
+    public static String serializeLoginSuccessMessage(int row, int col) {
+        return MessageType.LOGIN_SUCCESS + "$" + row + ":" + col;
     }
 
     public static String serializeLoginErrorMessage(String message) {
