@@ -56,6 +56,14 @@ public class ChessPlate extends JPanel {
         setSize((row + 2) * SPACE_MARGIN, (col + 2) * SPACE_MARGIN);
     }
 
+    public int getWidth() {
+        return (row + 2) * SPACE_MARGIN;
+    }
+
+    public int getHeight() {
+        return (col + 2) * SPACE_MARGIN;
+    }
+
     /**
      * calc real chess pos
      * @param clickX mouse click x
