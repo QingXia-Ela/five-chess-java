@@ -5,6 +5,7 @@ import src.Chess.Enums.ChessType;
 import src.Chess.Enums.PlateState;
 import src.Chess.Exception.ChessAlreadyExistException;
 import src.Chess.Exception.ChessPlateCannotRegretException;
+import src.Chess.Exception.ExceedChessPlateException;
 import src.Chess.Exception.PlateIsFullException;
 import src.Chess.SingleChess;
 import src.Gui.Gui;
@@ -42,10 +43,11 @@ public class ClientCore extends Core {
     }
 
     private void showChessPlate() {
-        g = new Gui(row, col);
+        g = new Gui(row, col, false);
         g.setSelfNameValue(selfName);
         g.setOpponentNameValue(opponentName);
         chessPlate = g.plate;
+        g.setWhoOperate(false);
     }
 
     private void addChessPlateEvent() {
@@ -77,8 +79,9 @@ public class ClientCore extends Core {
 //                block operation
                     chessPlate.setPlateIsBlocking(true);
                     canOperate = false;
-                } catch (PlateIsFullException ex) {
-
+                    g.setWhoOperate(false);
+                } catch (ExceedChessPlateException ex) {
+                    Utils.alert("超出棋盘范围");
                 } catch (ChessAlreadyExistException ex) {
                     Utils.alert(ex.getMessage());
                 } catch (Exception ex) {
@@ -110,6 +113,23 @@ public class ClientCore extends Core {
         });
     }
 
+    private void regret() {
+        try {
+            chessPlate.regret();
+            chessPlate.canRegret();
+            Logger.debug("Regret without init state");
+        }
+//                        init state, black can operation
+        catch (ChessPlateCannotRegretException ex) {
+            Logger.debug("Trigger init plate");
+            canOperate = false;
+            chessPlate.setPlateIsBlocking(true);
+            g.setWhoOperate(false);
+        } catch (Exception ex) {
+            Utils.alert(ex.getMessage());
+        }
+    }
+
     private void addMessageHandlerEvent() {
         clientMessageHandler
                 .addEventListener(MessageType.LOGIN_SUCCESS, e -> {
@@ -131,8 +151,15 @@ public class ClientCore extends Core {
 //                unblock operation
                         chessPlate.setPlateIsBlocking(false);
                         chessPlate.chess_place(info.x, info.y);
+                        PlateState p = chessPlate.calcIsWin(info.x, info.y);
 
-                        canOperate = true;
+                        if (p == PlateState.RUNNING) {
+                            canOperate = true;
+//                        self operation
+                            g.setWhoOperate(true);
+                        } else {
+                            chessPlate.setPlateIsBlocking(true);
+                        }
                     } catch (Exception ex) {
                         Logger.error(ex.getMessage());
                     }
@@ -142,7 +169,7 @@ public class ClientCore extends Core {
                     try {
                         clientMessageHandler.sendMessage(MessageResolver.serializeRegretResponseMessage(choose == 0));
                         if (choose == 0) {
-                            chessPlate.regret();
+                            regret();
                         }
                     } catch (Exception ex) {
                         Logger.error(ex.getMessage());
@@ -151,17 +178,7 @@ public class ClientCore extends Core {
                 .addEventListener(MessageType.REGRET_RESPONSE, e -> {
                     boolean res = MessageResolver.resolveRegretResponseMessage(e.getActionCommand());
                     if (res) {
-                        try {
-                            chessPlate.regret();
-                            chessPlate.canRegret();
-                        }
-//                        init state, white cannot operation
-                        catch (ChessPlateCannotRegretException ex) {
-                            canOperate = false;
-                            chessPlate.setPlateIsBlocking(true);
-                        } catch (Exception ex) {
-                            Utils.alert(ex.getMessage());
-                        }
+                        regret();
                     }
                 });
     }

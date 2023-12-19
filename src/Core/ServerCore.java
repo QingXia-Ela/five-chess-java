@@ -2,8 +2,10 @@ package src.Core;
 
 import src.Chess.ChessPlate;
 import src.Chess.Enums.ChessType;
+import src.Chess.Enums.PlateState;
 import src.Chess.Exception.ChessAlreadyExistException;
 import src.Chess.Exception.ChessPlateCannotRegretException;
+import src.Chess.Exception.ExceedChessPlateException;
 import src.Chess.SingleChess;
 import src.Gui.Gui;
 import src.Logger.Logger;
@@ -34,24 +36,32 @@ public class ServerCore extends Core {
         serverMessageHandler.listen();
         this.row = row;
         this.col = col;
-        g = new Gui(row, col);
+        g = new Gui(row, col, true);
         g.setSelfNameValue(selfName);
         g.setOpponentNameValue("等待加入...");
         chessPlate = g.plate;
         this.selfName = selfName;
         addMessageHandlerEvent();
         addChessPlateEvent();
+        g.setWhoOperate(true);
     }
 
     private void addChessPlateEvent() {
 //        chessPlate
         chessPlate.onSomeoneWin(e -> {
-            Utils.alert("");
+            PlateState res = PlateState.valueOf(e.getActionCommand());
+            if (res == PlateState.BLACK_WIN) {
+                Utils.alert("黑方获胜");
+            }
+            else if (res == PlateState.WHITE_WIN) {
+                Utils.alert("白方获胜");
+            }
             chessPlate.setPlateIsBlocking(true);
             canOperate = false;
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                Logger.debug("Can operate: " + canOperate);
                 if (!canOperate) {
                     return;
                 }
@@ -63,15 +73,18 @@ public class ServerCore extends Core {
                     serverMessageHandler.sendMessage(MessageResolver.serializeChessPlaceMessage(
                             new SingleChess(pos[0], pos[1], ChessType.BLACK))
                     );
-                } catch (ChessAlreadyExistException ex) {
-                    Utils.alert(ex.getMessage());
-                }  catch (Exception ex) {
-                    Logger.error(ex.getMessage());
-                }
 
 //                block operation
-                chessPlate.setPlateIsBlocking(true);
-                canOperate = false;
+                    chessPlate.setPlateIsBlocking(true);
+                    canOperate = false;
+                    g.setWhoOperate(false);
+                } catch (ChessAlreadyExistException ex) {
+                    Utils.alert(ex.getMessage());
+                } catch (ExceedChessPlateException ex) {
+                    Utils.alert("超出棋盘范围");
+                } catch (Exception ex) {
+                    Logger.error(ex.getMessage());
+                }
             }
         });
         g.onRegret(e -> {
@@ -98,6 +111,23 @@ public class ServerCore extends Core {
         });
     }
 
+    private void regret() {
+        try {
+            chessPlate.regret();
+            chessPlate.canRegret();
+            Logger.debug("Regret without init state");
+        }
+//                        init state, black can operation
+        catch (ChessPlateCannotRegretException ex) {
+            Logger.debug("Trigger init plate");
+            canOperate = true;
+            chessPlate.setPlateIsBlocking(false);
+            g.setWhoOperate(true);
+        } catch (Exception ex) {
+            Utils.alert(ex.getMessage());
+        }
+    }
+
     private void addMessageHandlerEvent() {
         serverMessageHandler
                 .addEventListener(MessageType.LOGIN, e -> {
@@ -120,8 +150,15 @@ public class ServerCore extends Core {
 //                unblock operation
                         chessPlate.setPlateIsBlocking(false);
                         chessPlate.chess_place(info.x, info.y);
+                        PlateState p = chessPlate.calcIsWin(info.x, info.y);
 
-                        canOperate = true;
+                        if (p == PlateState.RUNNING) {
+                            canOperate = true;
+//                        self operation
+                            g.setWhoOperate(true);
+                        } else {
+                            chessPlate.setPlateIsBlocking(true);
+                        }
                     } catch (Exception ex) {
                         Logger.error(ex.getMessage());
                     }
@@ -131,7 +168,7 @@ public class ServerCore extends Core {
                     try {
                         serverMessageHandler.sendMessage(MessageResolver.serializeRegretResponseMessage(choose == 0));
                         if (choose == 0) {
-                            chessPlate.regret();
+                            regret();
                         }
                     } catch (Exception ex) {
                         Logger.error(ex.getMessage());
@@ -140,17 +177,7 @@ public class ServerCore extends Core {
                 .addEventListener(MessageType.REGRET_RESPONSE, e -> {
                     boolean res = MessageResolver.resolveRegretResponseMessage(e.getActionCommand());
                     if (res) {
-                        try {
-                            chessPlate.regret();
-                            chessPlate.canRegret();
-                        }
-//                        init state, white cannot operation
-                        catch (ChessPlateCannotRegretException ex) {
-                            canOperate = true;
-                            chessPlate.setPlateIsBlocking(false);
-                        } catch (Exception ex) {
-                            Utils.alert(ex.getMessage());
-                        }
+                        regret();
                     }
                 });
     }

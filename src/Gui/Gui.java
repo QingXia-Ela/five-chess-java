@@ -12,10 +12,12 @@ public class Gui {
     private JLabel selfNameValue;
     private JLabel opponentNameValue;
     private JButton regret;
+    private JLabel selfColor;
+    private JLabel whoOperate;
 
     public ChessPlate plate;
 
-    public Gui(int row, int col){
+    public Gui(int row, int col, boolean isServer) {
         ChessPlate plate = new ChessPlate(row,col);
         JFrame frame = new JFrame("ybb");
         plateContainer.add(plate);
@@ -24,6 +26,13 @@ public class Gui {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(plate.getWidth() + 200, plate.getHeight());
         frame.setVisible(true);
+
+        if (isServer) selfColor.setText("黑色");
+        else selfColor.setText("白色");
+    }
+
+    public void setWhoOperate(boolean self) {
+        whoOperate.setText(self ? "由你操作" : "对方操作");
     }
 
     public void render() {
@@ -55,7 +64,7 @@ public class Gui {
     public static void main(String[] args) throws InterruptedException {
         ChessPlate plate = new ChessPlate(19,19);
         JFrame frame = new JFrame("ybb");
-        Gui g = new Gui(19,19);
+        Gui g = new Gui(19,19, true);
         g.plateContainer.add(plate);
         frame.setContentPane(g.root);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

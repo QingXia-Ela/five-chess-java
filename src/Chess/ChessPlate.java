@@ -192,7 +192,7 @@ public class ChessPlate extends JPanel {
         return false;
     }
 
-    private PlateState calcIsWin(int row, int col) {
+    public PlateState calcIsWin(int row, int col) {
         if (progress.size() == this.row * this.col) return PlateState.PLATE_FULL;
 
         boolean flag = false;
@@ -298,6 +298,7 @@ public class ChessPlate extends JPanel {
     }
 
     public void regret() throws ChessPlateCannotRegretException {
+        Logger.debug("Chess begin regret, stack size: " + progress.size());
         canRegret();
         if (progress.size() == 1) {
             clear();
