@@ -100,7 +100,7 @@ public class Client extends Handler{
 
     //    test only
     public static void main(String[] args) throws Exception {
-        Client c = new Client(11451);
+        Client c = new Client(1145);
 
         c.listen();
 

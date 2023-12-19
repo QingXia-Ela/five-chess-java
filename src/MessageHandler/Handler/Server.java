@@ -146,7 +146,7 @@ public class Server extends Handler {
 
         s.addEventListener(MessageType.LOGIN, e -> {
             try {
-                s.sendMessage(MessageResolver.serializeLoginSuccessMessage(114,514));
+                s.sendMessage(MessageResolver.serializeLoginSuccessMessage(114,514, "dev"));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

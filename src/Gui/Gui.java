@@ -3,6 +3,7 @@ package src.Gui;
 import src.Chess.ChessPlate;
  
 import javax.swing.*;
+import java.awt.event.ActionListener;
 
 public class Gui {
     private JPanel root;
@@ -18,15 +19,37 @@ public class Gui {
         ChessPlate plate = new ChessPlate(row,col);
         JFrame frame = new JFrame("ybb");
         plateContainer.add(plate);
+        this.plate = plate;
         frame.setContentPane(root);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(plate.getWidth() + 500, plate.getHeight());
+        frame.setSize(plate.getWidth() + 200, plate.getHeight());
         frame.setVisible(true);
     }
 
     public void render() {
         root.repaint();
     }
+
+    public String getSelfNameValue() {
+        return selfNameValue.getText();
+    }
+
+    public void setSelfNameValue(String name) {
+        selfNameValue.setText(name);
+    }
+
+    public String getOpponentNameValue() {
+        return opponentNameValue.getText();
+    }
+
+    public void setOpponentNameValue(String name) {
+        opponentNameValue.setText(name);
+    }
+
+    public Gui onRegret(ActionListener listener) {
+        regret.addActionListener(listener);
+        return this;
+    };
 
 //    test only
     public static void main(String[] args) throws InterruptedException {

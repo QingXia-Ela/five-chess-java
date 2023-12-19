@@ -34,15 +34,13 @@ public class Utils {
             try {
                 byte[] hb = MessageResolver.serializeHeartbeatMessage().getBytes();
 
-                socket.send(new DatagramPacket(hb, hb.length, InetAddress.getByName("127.0.0.1"), port));
+                socket.send(new DatagramPacket(hb, hb.length, InetAddress.getByName("localhost"), port));
 
                 byte[] response = new byte[1024];
 
                 DatagramPacket packet = new DatagramPacket(response, response.length);
 
                 socket.receive(packet);
-
-                socket.close();
 
                 online.set(true);
             } catch (Exception e) {
@@ -53,9 +51,6 @@ public class Utils {
         t.start();
 
         Thread.sleep(100);
-
-        t.interrupt();
-        socket.close();
 
         return online.get();
     }

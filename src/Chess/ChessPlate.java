@@ -80,7 +80,7 @@ public class ChessPlate extends JPanel {
         int minX = (x + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, minY = (y + 1) * SPACE_MARGIN - HALF_CHESS_SIZE, maxX = (x + 1) * SPACE_MARGIN + HALF_CHESS_SIZE, maxY = (y + 1) * SPACE_MARGIN + HALF_CHESS_SIZE;
         if (clickX < minX || clickY < minY || clickX > maxX || clickY > maxY) return null;
 
-        Logger.debug("Chess Plate: Mouse clicked at " + clickX + ", " + clickY + ", parsed pos: " + x + ", " + y);
+        Logger.debug("Calc Chess Pos: Mouse clicked at " + clickX + ", " + clickY + ", parsed pos: " + x + ", " + y);
 
         return new int[]{x, y};
     }
@@ -380,7 +380,6 @@ public class ChessPlate extends JPanel {
         j.setVisible(true);
 
         c.onSomeoneWin(e -> {
-
             System.out.println(e.getActionCommand());
             new Thread(() -> {
                 try {

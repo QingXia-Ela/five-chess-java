@@ -33,15 +33,18 @@ public class MessageResolver {
     @AcceptType(MessageType.CHESS_PLACE)
     public static SingleChess resolveChessPlaceMessage(String body) throws MessageResolveException {
         String[] chessInfo = body.trim().split(":");
+        System.out.println(chessInfo[0] == "BLACK");
 //        check length
         if (chessInfo.length != 3) throw new MessageResolveException("棋子信息不合法");
 //        check chess type
         if (
-            !Objects.equals(chessInfo[0], "BLACK") ||
-            !Objects.equals(chessInfo[1], "WHITE")
+            !(
+                Objects.equals(chessInfo[0], "BLACK") ||
+                Objects.equals(chessInfo[0], "WHITE")
+            )
         ) throw new MessageResolveException("棋子类型不合法");
 
-        return new SingleChess(Integer.parseInt(chessInfo[0]), Integer.parseInt(chessInfo[1]), ChessType.valueOf(chessInfo[2]));
+        return new SingleChess(Integer.parseInt(chessInfo[1]), Integer.parseInt(chessInfo[2]), ChessType.valueOf(chessInfo[0]));
     }
 
     @AcceptType(MessageType.CHAT)
@@ -60,10 +63,10 @@ public class MessageResolver {
     }
 
     @AcceptType(MessageType.LOGIN_SUCCESS)
-    public static int[] resolveLoginSuccessMessage(String body) throws MessageResolveException {
+    public static String[] resolveLoginSuccessMessage(String body) throws MessageResolveException {
         String[] PlateInfo = body.trim().split(":");
-        if (PlateInfo.length != 2) throw new MessageResolveException("棋盘信息不合法");
-        return new int[]{Integer.parseInt(PlateInfo[0]), Integer.parseInt(PlateInfo[1])};
+        if (PlateInfo.length != 3) throw new MessageResolveException("棋盘信息不合法");
+        return PlateInfo;
     }
 
     @AcceptType(MessageType.LOGIN_ERROR)
@@ -82,6 +85,7 @@ public class MessageResolver {
     public static String resolveLogoutMessage(String body) {
         return body.trim();
     }
+
 //    serialize message
     public static String serializeOKMessage(String message) {
         return MessageType.OK + "$" + message;
@@ -115,8 +119,8 @@ public class MessageResolver {
         return MessageType.HEARTBEAT + "$ ";
     }
 
-    public static String serializeLoginSuccessMessage(int row, int col) {
-        return MessageType.LOGIN_SUCCESS + "$" + row + ":" + col;
+    public static String serializeLoginSuccessMessage(int row, int col, String name) {
+        return MessageType.LOGIN_SUCCESS + "$" + row + ":" + col + ":" + name;
     }
 
     public static String serializeLoginErrorMessage(String message) {

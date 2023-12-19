@@ -25,7 +25,7 @@
 
 | MSG TYPE        | MSG EXPLAIN | BODY EXAMPLE |
 |-----------------|-------------|--------------|
-| LOGIN_SUCCESS   | 棋盘宽高        | 114:514      |
+| LOGIN_SUCCESS   | 棋盘宽:高:名字    | 114:514:MIKA |
 | LOGIN_ERROR     | 登录错误原因      | 1337         |
 
 

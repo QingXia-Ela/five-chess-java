@@ -1,5 +1,7 @@
 package src.Gui;
 
+import src.Core.ClientCore;
+import src.Core.ServerCore;
 import src.Gui.Exception.ValidateErrorException;
 import src.MessageHandler.Handler.Client;
 import src.MessageHandler.Message.MessageResolver;
@@ -21,8 +23,10 @@ public class Login {
     private JButton createServerButton;
     private JTextField plateWidth;
     private JTextField plateHeight;
+    private JFrame outerFrame;
 
-    public Login() {
+    public Login(JFrame outerFrame) {
+        this.outerFrame = outerFrame;
         connectServerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -72,17 +76,6 @@ public class Login {
         return port;
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Login");
-        frame.setContentPane(new Login().root);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 200);
-        frame.setLocation(666,666);
-        frame.setVisible(true);
-    }
-
-
-
     private void onClickConnectButton() {
         try {
             int port = validateInputs();
@@ -90,11 +83,11 @@ public class Login {
             if (!isOnline) {
                 throw new ValidateErrorException("服务器离线");
             }
+            new ClientCore(port, usernameInput.getText());
+            outerFrame.setVisible(false);
         } catch (Exception e) {
             Utils.alert("错误:" + e.getMessage());
         }
-
-//        create client
     }
 
     private void onClickCreateServerButton() {
@@ -104,10 +97,22 @@ public class Login {
             if (!canUse) {
                 throw new ValidateErrorException("端口被占用");
             }
+            int[] info = validatePlateSize();
+//        create server
+            new ServerCore(port, usernameInput.getText(), info[0], info[1]);
+            outerFrame.setVisible(false);
         } catch (Exception e) {
             Utils.alert("错误:" + e.getMessage());
         }
+    }
 
-//        create server
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Login");
+        Login login = new Login(frame);
+        frame.setContentPane(login.root);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(700, 200);
+        frame.setLocation(666,666);
+        frame.setVisible(true);
     }
 }
