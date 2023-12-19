@@ -38,6 +38,9 @@ public class Login {
         });
     }
 
+    /**
+     * Will validate plate size
+     */
     private int[] validatePlateSize() throws ValidateErrorException {
 //        plate size should bigger than 5
         if (Integer.parseInt(plateWidth.getText()) < 5 || Integer.parseInt(plateHeight.getText()) < 5) {
@@ -46,6 +49,9 @@ public class Login {
         return new int[]{Integer.parseInt(plateWidth.getText()), Integer.parseInt(plateHeight.getText())};
     }
 
+    /**
+     * Will validate username and port
+     * */
     private int validateInputs() throws ValidateErrorException {
         if (usernameInput.getText().isEmpty()) {
             throw new ValidateErrorException("用户名不能为空");
@@ -53,10 +59,6 @@ public class Login {
         int port;
         try {
             port = Integer.parseInt(portInput.getText());
-            boolean isOnline = Utils.isOnline(port);
-            if (!isOnline) {
-                throw new ValidateErrorException("服务器离线");
-            }
         } catch (NumberFormatException e) {
             throw new ValidateErrorException("端口输入数字不合法！");
         } catch (Exception e) {
@@ -84,13 +86,28 @@ public class Login {
     private void onClickConnectButton() {
         try {
             int port = validateInputs();
-
-        } catch (ValidateErrorException e) {
+            boolean isOnline = Utils.isOnline(port);
+            if (!isOnline) {
+                throw new ValidateErrorException("服务器离线");
+            }
+        } catch (Exception e) {
             Utils.alert("错误:" + e.getMessage());
         }
+
+//        create client
     }
 
     private void onClickCreateServerButton() {
+        try {
+            int port = validateInputs();
+            boolean canUse = Utils.canPortUse(port);
+            if (!canUse) {
+                throw new ValidateErrorException("端口被占用");
+            }
+        } catch (Exception e) {
+            Utils.alert("错误:" + e.getMessage());
+        }
 
+//        create server
     }
 }

@@ -9,17 +9,30 @@ public class Gui {
     public JPanel plateContainer;
     private JPanel infoContainer;
     private JLabel selfNameValue;
-    private JLabel opponentName;
+    private JLabel opponentNameValue;
     private JButton regret;
 
-    private void addPlate() {
-        this.plateContainer.add(new ChessPlate(19,19));
+    public ChessPlate plate;
+
+    public Gui(int row, int col){
+        ChessPlate plate = new ChessPlate(row,col);
+        JFrame frame = new JFrame("ybb");
+        plateContainer.add(plate);
+        frame.setContentPane(root);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(plate.getWidth() + 500, plate.getHeight());
+        frame.setVisible(true);
     }
 
+    public void render() {
+        root.repaint();
+    }
+
+//    test only
     public static void main(String[] args) throws InterruptedException {
         ChessPlate plate = new ChessPlate(19,19);
         JFrame frame = new JFrame("ybb");
-        Gui g = new Gui();
+        Gui g = new Gui(19,19);
         g.plateContainer.add(plate);
         frame.setContentPane(g.root);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

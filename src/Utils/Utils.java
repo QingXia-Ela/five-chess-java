@@ -25,14 +25,13 @@ public class Utils {
      * <br>
      * <b>Warning</b>: This method is blocking thread about 100ms.
      * */
-    public static boolean isOnline(int port) throws InterruptedException {
+    public static boolean isOnline(int port) throws Exception {
         AtomicBoolean online = new AtomicBoolean(false);
         Logger.debug("Checking if server is online at :"+port+"...");
+        DatagramSocket socket = new DatagramSocket();
 
         Thread t = new Thread(() -> {
             try {
-                DatagramSocket socket = new DatagramSocket();
-
                 byte[] hb = MessageResolver.serializeHeartbeatMessage().getBytes();
 
                 socket.send(new DatagramPacket(hb, hb.length, InetAddress.getByName("127.0.0.1"), port));
@@ -55,6 +54,18 @@ public class Utils {
 
         Thread.sleep(100);
 
+        t.interrupt();
+        socket.close();
+
         return online.get();
+    }
+
+    public static boolean canPortUse(int port) {
+        try {
+            new DatagramSocket(port).close();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

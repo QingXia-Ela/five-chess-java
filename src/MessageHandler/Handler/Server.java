@@ -37,6 +37,7 @@ public class Server extends Handler {
             try {
                 sendMessage(MessageResolver.serializeHeartbeatMessage());
             } catch (IOException ex) {
+                Logger.error("Server heartbeat error: " + ex.getMessage());
                 ex.printStackTrace();
             }
         });
@@ -89,15 +90,23 @@ public class Server extends Handler {
                     int len = packet.getLength();
                     String in = new String(data, 0, len);
                     ClientMessage msg = clientMessageUtilsObj.parse_message(in);
-//                    not from current client, we can respond heartbeat
+//                    we can respond heartbeat from any client.
                     if (msg.type == MessageType.HEARTBEAT) {
                         sendMessage(MessageResolver.serializeHeartbeatMessage(), packet.getPort());
                         Logger.debug("Server received heartbeat: " + in + " from port: " + packet.getPort());
                         continue;
                     }
+
 //                    init client port
                     if (clientPort == 0) {
                         clientPort = packet.getPort();
+                    }
+
+//                    not from current client
+                    if (packet.getPort() != clientPort) {
+                        sendMessage(MessageResolver.serializeErrorMessage("服务器已经与其他客户端连接了！"), packet.getPort());
+                        Logger.warning("Received message from other client, operation denied.");
+                        continue;
                     }
 
                     actionMap.get(msg.type).forEach(action -> action.actionPerformed(new ActionEvent(msg, 0, msg.message)));
