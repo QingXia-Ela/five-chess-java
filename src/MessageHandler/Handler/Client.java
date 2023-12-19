@@ -29,8 +29,12 @@ public class Client extends Handler{
     public Client(int port) throws SocketException {
         super();
         this.serverPort = port;
-        Logger.info("Create Client Message Handler at port " + port);
+        Logger.info("Create Client Message Handler to port " + port);
         this.clientSocket = new DatagramSocket();
+//        heartbeat keep online
+        addEventListener(MessageType.HEARTBEAT, e -> {
+            Logger.info("Heartbeat received");
+        });
     }
 
     @Override
@@ -100,20 +104,18 @@ public class Client extends Handler{
 
         c.listen();
 
-        c.addEventListener(MessageType.HEARTBEAT, e -> {
-            Logger.info("Heartbeat received");
-        }).addEventListener(MessageType.LOGIN_SUCCESS, e -> {
-            try {
-                Logger.info("plate info: " + Arrays.toString(MessageResolver.resolveLoginSuccessMessage(e.getActionCommand())));
-            } catch (MessageResolveException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+//        c.addEventListener(MessageType.LOGIN_SUCCESS, e -> {
+//            try {
+//                Logger.info("plate info: " + Arrays.toString(MessageResolver.resolveLoginSuccessMessage(e.getActionCommand())));
+//            } catch (MessageResolveException ex) {
+//                throw new RuntimeException(ex);
+//            }
+//        });
 
+
+        Thread.sleep(1000);
         c.sendMessage(MessageResolver.serializeHeartbeatMessage());
 
-        Thread.sleep(2000);
-
-        c.sendMessage(MessageResolver.serializeLoginMessage("test", "test"));
+//        c.sendMessage(MessageResolver.serializeLoginMessage("test", "test"));
     }
 }

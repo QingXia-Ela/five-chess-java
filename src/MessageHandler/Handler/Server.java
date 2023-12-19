@@ -31,6 +31,15 @@ public class Server extends Handler {
         super();
         Logger.info("Create Server Message Handler at port " + port);
         this.serverSocket = new DatagramSocket(port);
+
+//        heartbeat keep online
+        addEventListener(MessageType.HEARTBEAT, e -> {
+            try {
+                sendMessage(MessageResolver.serializeHeartbeatMessage());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -56,9 +65,13 @@ public class Server extends Handler {
             Logger.warning("Client port is not set, can not send message, operation denied.");
             return;
         }
+        sendMessage(message, clientPort);
+    }
+
+    private void sendMessage(String message, int port) throws IOException {
         byte[] buf = message.getBytes();
         int len = buf.length;
-        DatagramPacket packet = new DatagramPacket(buf, len, InetAddress.getByName("localhost"), clientPort);
+        DatagramPacket packet = new DatagramPacket(buf, len, InetAddress.getByName("localhost"), port);
         serverSocket.send(packet);
     }
 
@@ -74,12 +87,19 @@ public class Server extends Handler {
                     serverSocket.receive(packet);
                     byte[] data = packet.getData();
                     int len = packet.getLength();
+                    String in = new String(data, 0, len);
+                    ClientMessage msg = clientMessageUtilsObj.parse_message(in);
+//                    not from current client, we can respond heartbeat
+                    if (msg.type == MessageType.HEARTBEAT) {
+                        sendMessage(MessageResolver.serializeHeartbeatMessage(), packet.getPort());
+                        Logger.debug("Server received heartbeat: " + in + " from port: " + packet.getPort());
+                        continue;
+                    }
 //                    init client port
                     if (clientPort == 0) {
                         clientPort = packet.getPort();
                     }
-                    String in = new String(data, 0, len);
-                    ClientMessage msg = clientMessageUtilsObj.parse_message(in);
+
                     actionMap.get(msg.type).forEach(action -> action.actionPerformed(new ActionEvent(msg, 0, msg.message)));
                     Logger.debug("Server received: " + in + " from port: " + packet.getPort());
                 } catch (Exception e) {
@@ -115,13 +135,7 @@ public class Server extends Handler {
         Server s = new Server(11451);
         s.listen();
 
-        s.addEventListener(MessageType.HEARTBEAT, e -> {
-            try {
-                s.sendMessage(MessageResolver.serializeHeartbeatMessage());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }).addEventListener(MessageType.LOGIN, e -> {
+        s.addEventListener(MessageType.LOGIN, e -> {
             try {
                 s.sendMessage(MessageResolver.serializeLoginSuccessMessage(114,514));
             } catch (IOException ex) {
