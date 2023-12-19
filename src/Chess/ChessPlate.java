@@ -291,14 +291,17 @@ public class ChessPlate extends JPanel {
         TimeForWhite = !TimeForWhite;
     }
 
+    public void canRegret() throws ChessPlateCannotRegretException  {
+        if (progress.isEmpty()) {
+            throw new ChessPlateCannotRegretException();
+        }
+    }
+
     public void regret() throws ChessPlateCannotRegretException {
-        if (PlateIsBlocking) return;
+        canRegret();
         if (progress.size() == 1) {
             clear();
             return;
-        }
-        else if (progress.isEmpty()) {
-            throw new ChessPlateCannotRegretException();
         }
 
         SingleChess c1 = progress.pop();

@@ -16,8 +16,17 @@ public class Utils {
         JOptionPane.showMessageDialog(null, message);
     }
 
-    public static void confirm(String message) {
-        JOptionPane.showConfirmDialog(null, message);
+    public static int confirm(String message) {
+        return JOptionPane.showConfirmDialog(null, message);
+    }
+
+    /**
+     * Show a waiting dialog. You should call {@link JOptionPane#setVisible(boolean)} manually to control visibility.
+     * We suggest you only create one in the class.
+     */
+    public static JOptionPane showWaitingDialog(String message) {
+        JOptionPane p = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
+        return p;
     }
 
     /**

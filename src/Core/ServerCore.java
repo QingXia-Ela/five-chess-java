@@ -3,6 +3,7 @@ package src.Core;
 import src.Chess.ChessPlate;
 import src.Chess.Enums.ChessType;
 import src.Chess.Exception.ChessAlreadyExistException;
+import src.Chess.Exception.ChessPlateCannotRegretException;
 import src.Chess.SingleChess;
 import src.Gui.Gui;
 import src.Logger.Logger;
@@ -46,6 +47,8 @@ public class ServerCore extends Core {
 //        chessPlate
         chessPlate.onSomeoneWin(e -> {
             Utils.alert("");
+            chessPlate.setPlateIsBlocking(true);
+            canOperate = false;
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -66,11 +69,31 @@ public class ServerCore extends Core {
                     Logger.error(ex.getMessage());
                 }
 
-
-
 //                block operation
                 chessPlate.setPlateIsBlocking(true);
                 canOperate = false;
+            }
+        });
+        g.onRegret(e -> {
+            if (!canOperate) {
+                return;
+            }
+            try {
+                chessPlate.canRegret();
+            } catch (Exception ex) {
+                Utils.alert(ex.getMessage());
+                return;
+            }
+
+            int choose = Utils.confirm("是否要进行悔棋？");
+            if (choose > 0) return;
+
+            p.setVisible(true);
+
+            try {
+                serverMessageHandler.sendMessage(MessageResolver.serializeChessRegretMessage());
+            } catch (IOException ex) {
+                Logger.error(ex.getMessage());
             }
         });
     }
@@ -103,7 +126,32 @@ public class ServerCore extends Core {
                         Logger.error(ex.getMessage());
                     }
                 })
-                .addEventListener(MessageType.CHESS_REGRET, e -> {})
-                .addEventListener(MessageType.REGRET_RESPONSE, e -> {});
+                .addEventListener(MessageType.CHESS_REGRET, e -> {
+                    int choose = Utils.confirm("对方请求悔棋，是否同意？");
+                    try {
+                        serverMessageHandler.sendMessage(MessageResolver.serializeRegretResponseMessage(choose == 0));
+                        if (choose == 0) {
+                            chessPlate.regret();
+                        }
+                    } catch (Exception ex) {
+                        Logger.error(ex.getMessage());
+                    }
+                })
+                .addEventListener(MessageType.REGRET_RESPONSE, e -> {
+                    boolean res = MessageResolver.resolveRegretResponseMessage(e.getActionCommand());
+                    if (res) {
+                        try {
+                            chessPlate.regret();
+                            chessPlate.canRegret();
+                        }
+//                        init state, white cannot operation
+                        catch (ChessPlateCannotRegretException ex) {
+                            canOperate = true;
+                            chessPlate.setPlateIsBlocking(false);
+                        } catch (Exception ex) {
+                            Utils.alert(ex.getMessage());
+                        }
+                    }
+                });
     }
 }

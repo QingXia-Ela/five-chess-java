@@ -18,6 +18,7 @@
 | CHAT            | 消息          | 114514       |
 | CHAT_RECEIVE    | 消息接收        | 1919810      |
 | HEARTBEAT       | 心跳包         |              |
+| PLATE_FULL      | 棋盘已满        |              |
 
 ### Server
 
