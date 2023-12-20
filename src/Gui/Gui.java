@@ -24,7 +24,7 @@ public class Gui {
         this.plate = plate;
         frame.setContentPane(root);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(plate.getWidth() + 200, plate.getHeight());
+        frame.setSize(plate.getWidth() + 300, plate.getHeight());
         frame.setVisible(true);
 
         if (isServer) selfColor.setText("黑色");

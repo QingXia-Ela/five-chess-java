@@ -1,11 +1,13 @@
 package src.Core;
 
+import src.Audio.AudioPlayer;
 import src.Chess.ChessPlate;
 import src.Chess.Enums.ChessType;
 import src.Chess.Enums.PlateState;
 import src.Chess.Exception.ChessAlreadyExistException;
 import src.Chess.Exception.ChessPlateCannotRegretException;
 import src.Chess.Exception.ExceedChessPlateException;
+import src.Chess.Exception.PlateIsFullException;
 import src.Chess.SingleChess;
 import src.Gui.Gui;
 import src.Logger.Logger;
@@ -26,7 +28,7 @@ public class ServerCore extends Core {
     Gui g;
     ChessPlate chessPlate;
     String selfName;
-    boolean canOperate = true;
+    boolean canOperate = false;
 
     /**
      * @throws Exception when port is already in use.
@@ -82,6 +84,19 @@ public class ServerCore extends Core {
                     Utils.alert(ex.getMessage());
                 } catch (ExceedChessPlateException ex) {
                     Utils.alert("超出棋盘范围");
+                } catch (PlateIsFullException ex) {
+//                    if full, still send msg, and block plate
+                    try {
+                        serverMessageHandler.sendMessage(MessageResolver.serializeChessPlaceMessage(
+                                new SingleChess(pos[0], pos[1], ChessType.BLACK))
+                        );
+                    } catch (IOException exc) {
+                        Logger.error(exc.getMessage());
+                    } finally {
+                        canOperate = false;
+                        chessPlate.setPlateIsBlocking(true);
+                        Utils.alert("棋盘已满，游戏结束");
+                    }
                 } catch (Exception ex) {
                     Logger.error(ex.getMessage());
                 }
@@ -136,6 +151,7 @@ public class ServerCore extends Core {
                         String username = loginInfo[0];
                         g.setOpponentNameValue(username);
                         serverMessageHandler.sendMessage(MessageResolver.serializeLoginSuccessMessage(row, col, selfName));
+                        canOperate = true;
                     } catch (Exception ex) {
                         try {
                             serverMessageHandler.sendMessage(MessageResolver.serializeLoginErrorMessage(ex.getMessage()));

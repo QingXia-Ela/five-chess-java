@@ -84,7 +84,20 @@ public class ClientCore extends Core {
                     Utils.alert("超出棋盘范围");
                 } catch (ChessAlreadyExistException ex) {
                     Utils.alert(ex.getMessage());
-                } catch (Exception ex) {
+                } catch (PlateIsFullException ex) {
+//                    if full, still send msg, and block
+                try {
+                    clientMessageHandler.sendMessage(MessageResolver.serializeChessPlaceMessage(
+                            new SingleChess(pos[0], pos[1], ChessType.BLACK))
+                    );
+                } catch (IOException exc) {
+                    Logger.error(exc.getMessage());
+                } finally {
+                    canOperate = false;
+                    chessPlate.setPlateIsBlocking(true);
+                    Utils.alert("棋盘已满，游戏结束");
+                }
+            }  catch (Exception ex) {
                     Logger.error(ex.getMessage());
                 }
             }

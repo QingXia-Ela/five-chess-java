@@ -3,6 +3,7 @@ package src.Gui;
 import src.Core.ClientCore;
 import src.Core.ServerCore;
 import src.Gui.Exception.ValidateErrorException;
+import src.Logger.Logger;
 import src.MessageHandler.Handler.Client;
 import src.MessageHandler.Message.MessageResolver;
 import src.Utils.Utils;
@@ -107,6 +108,8 @@ public class Login {
     }
 
     public static void main(String[] args) {
+//        set to info
+        Logger.setLogLevel(3);
         JFrame frame = new JFrame("Login");
         Login login = new Login(frame);
         frame.setContentPane(login.root);

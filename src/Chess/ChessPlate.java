@@ -1,5 +1,6 @@
 package src.Chess;
 
+import src.Audio.AudioPlayer;
 import src.Chess.Enums.ChessType;
 import src.Chess.Enums.PlateState;
 import src.Chess.Exception.*;
@@ -8,6 +9,7 @@ import src.Logger.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileOutputStream;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -53,15 +55,15 @@ public class ChessPlate extends JPanel {
         this.col = col;
         this.space = new ChessType[row][col];
         clear_chess();
-        setSize((row + 2) * SPACE_MARGIN, (col + 2) * SPACE_MARGIN);
+        setSize((col + 2) * SPACE_MARGIN, (row + 2) * SPACE_MARGIN);
     }
 
     public int getWidth() {
-        return (row + 2) * SPACE_MARGIN;
+        return (col + 2) * SPACE_MARGIN;
     }
 
     public int getHeight() {
-        return (col + 2) * SPACE_MARGIN;
+        return (row + 2) * SPACE_MARGIN;
     }
 
     /**
@@ -288,6 +290,7 @@ public class ChessPlate extends JPanel {
     public void chess_place(int x, int y) throws PlateIsFullException, ExceedChessPlateException, ChessAlreadyExistException {
         if (PlateIsBlocking) return;
         chess_place(new SingleChess(x, y, TimeForWhite ? ChessType.WHITE : ChessType.BLACK));
+        AudioPlayer.playPutAudio("src/assets/put.wav");
         TimeForWhite = !TimeForWhite;
     }
 
@@ -384,7 +387,6 @@ public class ChessPlate extends JPanel {
         j.setVisible(true);
 
         c.onSomeoneWin(e -> {
-            System.out.println(e.getActionCommand());
             new Thread(() -> {
                 try {
                     Thread.sleep(5000);
@@ -392,7 +394,6 @@ public class ChessPlate extends JPanel {
                     ex.printStackTrace();
                 }
                 c.clear();
-                System.out.println("clean!");
             }).start();
 
         }).addMouseListener(new MouseAdapter() {

@@ -33,7 +33,6 @@ public class MessageResolver {
     @AcceptType(MessageType.CHESS_PLACE)
     public static SingleChess resolveChessPlaceMessage(String body) throws MessageResolveException {
         String[] chessInfo = body.trim().split(":");
-        System.out.println(chessInfo[0] == "BLACK");
 //        check length
         if (chessInfo.length != 3) throw new MessageResolveException("棋子信息不合法");
 //        check chess type
