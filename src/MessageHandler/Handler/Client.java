@@ -101,21 +101,8 @@ public class Client extends Handler{
     //    test only
     public static void main(String[] args) throws Exception {
         Client c = new Client(1145);
-
         c.listen();
-
-//        c.addEventListener(MessageType.LOGIN_SUCCESS, e -> {
-//            try {
-//                Logger.info("plate info: " + Arrays.toString(MessageResolver.resolveLoginSuccessMessage(e.getActionCommand())));
-//            } catch (MessageResolveException ex) {
-//                throw new RuntimeException(ex);
-//            }
-//        });
-
-
         Thread.sleep(1000);
         c.sendMessage(MessageResolver.serializeHeartbeatMessage());
-
-//        c.sendMessage(MessageResolver.serializeLoginMessage("test", "test"));
     }
 }

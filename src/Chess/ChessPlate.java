@@ -376,7 +376,7 @@ public class ChessPlate extends JPanel {
      * Test only
      */
     public static void main(String[] args) throws Exception {
-        ChessPlate c = new ChessPlate(2, 2);
+        ChessPlate c = new ChessPlate(8, 8);
 
         JFrame  j = new JFrame();
 
@@ -387,6 +387,7 @@ public class ChessPlate extends JPanel {
         j.setVisible(true);
 
         c.onSomeoneWin(e -> {
+            Logger.info(e.getActionCommand());
             new Thread(() -> {
                 try {
                     Thread.sleep(5000);
@@ -395,7 +396,6 @@ public class ChessPlate extends JPanel {
                 }
                 c.clear();
             }).start();
-
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

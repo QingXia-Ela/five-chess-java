@@ -16,7 +16,7 @@ import java.net.SocketException;
 //import javax.a
 
 public class Login {
-    private JPanel root;
+    public JPanel root;
     private JPanel loginPanel;
     private JTextField usernameInput;
     private JTextField portInput;
@@ -105,17 +105,5 @@ public class Login {
         } catch (Exception e) {
             Utils.alert("错误:" + e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-//        set to info
-        Logger.setLogLevel(3);
-        JFrame frame = new JFrame("Login");
-        Login login = new Login(frame);
-        frame.setContentPane(login.root);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 200);
-        frame.setLocation(666,666);
-        frame.setVisible(true);
     }
 }

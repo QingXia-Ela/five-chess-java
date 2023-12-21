@@ -141,7 +141,7 @@ public class Server extends Handler {
 
     //    test only
     public static void main(String[] args) throws Exception {
-        Server s = new Server(11451);
+        Server s = new Server(1145);
         s.listen();
 
         s.addEventListener(MessageType.LOGIN, e -> {
