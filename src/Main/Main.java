@@ -7,7 +7,7 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        Logger.setLogLevel(3);
+//        Logger.setLogLevel(3);
         JFrame frame = new JFrame("Login");
         Login login = new Login(frame);
         frame.setContentPane(login.root);

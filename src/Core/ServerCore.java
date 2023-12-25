@@ -54,12 +54,15 @@ public class ServerCore extends Core {
             PlateState res = PlateState.valueOf(e.getActionCommand());
             if (res == PlateState.BLACK_WIN) {
                 Utils.alert("黑方获胜");
+                canOperate = false;
+                g.setWhoOperate(false);
             }
             else if (res == PlateState.WHITE_WIN) {
                 Utils.alert("白方获胜");
+                canOperate = true;
+                g.setWhoOperate(true);
             }
             chessPlate.setPlateIsBlocking(true);
-            canOperate = false;
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

@@ -55,12 +55,15 @@ public class ClientCore extends Core {
             PlateState res = PlateState.valueOf(e.getActionCommand());
             if (res == PlateState.BLACK_WIN) {
                 Utils.alert("黑方获胜");
+                canOperate = true;
+                g.setWhoOperate(true);
             }
             else if (res == PlateState.WHITE_WIN) {
                 Utils.alert("白方获胜");
+                canOperate = false;
+                g.setWhoOperate(false);
             }
             chessPlate.setPlateIsBlocking(true);
-            canOperate = false;
         }).addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -128,6 +131,7 @@ public class ClientCore extends Core {
 
     private void regret() {
         try {
+            chessPlate.setPlateIsBlocking(false);
             chessPlate.regret();
             chessPlate.canRegret();
             Logger.debug("Regret without init state");
