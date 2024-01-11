@@ -70,6 +70,7 @@ public class ServerCore extends Core {
                 if (!canOperate) {
                     return;
                 }
+//                calc pos
                 int[] pos = chessPlate.calcChessPos(e.getX(), e.getY());
                 if (pos == null) return;
 
